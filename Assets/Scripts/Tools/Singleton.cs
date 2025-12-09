@@ -2,21 +2,21 @@ using UnityEngine;
 
 public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 {
-    private static T instance;
+    private static T _instance;
 
     //getter
     public static T Instance
     {
         get
         {
-            if (instance == null)
+            if (_instance == null)
             {
                 Debug.LogError("No instance of " + typeof(T) + " exists in the scene.");
                 return null;
             }
             else
             {
-                return instance;
+                return _instance;
             }
         }
     }
@@ -24,9 +24,9 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
     //create reference in Awake()
     protected void Awake()
     {
-        if (instance == null)
+        if (_instance == null)
         {
-            instance = this as T;
+            _instance = this as T;
             Init();
         }
         else
@@ -40,9 +40,9 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
     //destroy the reference in OnDestroy()
     protected void OnDestroy()
     {
-        if (this == instance)
+        if (this == _instance)
         {
-            instance = null;
+            _instance = null;
         }
     }
 

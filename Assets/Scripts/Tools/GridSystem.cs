@@ -62,7 +62,7 @@ public abstract class GridSystem<T> : Singleton<GridSystem<T>> where T : class
         {
             Debug.LogError("Grid has not been initialized.");
         }
-        return x >= 0 && x < _dimensions.x && y >= 0 && y < _dimensions.x;
+        return x >= 0 && x < _dimensions.x && y >= 0 && y < _dimensions.y;
     }
     public bool CheckBounds(Vector2Int position)
     {

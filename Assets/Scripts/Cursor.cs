@@ -21,9 +21,10 @@ public class Cursor : Singleton<Cursor>
     }
     public void SelectFirst(Matchable toSelect)
     {
+
         _selected[0] = toSelect;
 
-        if (!enabled || _selected[0] == null)
+        if (!enabled || _selected[0] == null || !_selected[0].Idle)
         {
             return;
         }
@@ -38,7 +39,7 @@ public class Cursor : Singleton<Cursor>
     public void SelectSecond(Matchable toSelect)
     {
         _selected[1] = toSelect;
-        if (!enabled || _selected[0] == null || _selected[1] == null || !_selected[1].Idle || _selected[0] == _selected[1])
+        if (!enabled || _selected[0] == null || _selected[1] == null || !_selected[0].Idle || !_selected[1].Idle || _selected[0] == _selected[1])
         {
             return;
         }

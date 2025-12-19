@@ -22,7 +22,7 @@ public class GameManager : Singleton<GameManager>
         // get references to other important game objects
         _pool = (MatchablePool)MatchablePool.Instance;
         _grid = (MatchableGrid)MatchableGrid.Instance;
-        _pool.PoolObjects(10);
+
 
         // set up the scene
         StartCoroutine(Setup());

@@ -21,12 +21,12 @@ public class Movable : MonoBehaviour
     private Vector3 from;
     private Vector3 to;
     private float howfar;
-    private bool idle = true;
+    private bool _idle = true;
     public bool Idle
     {
         get
         {
-            return idle;
+            return _idle;
         }
     }
     [SerializeField] private float speed = 1;
@@ -41,7 +41,7 @@ public class Movable : MonoBehaviour
         from = transform.position;
         to = targetPosition;
         howfar = 0;
-        idle = false;
+        _idle = false;
 
 
 
@@ -55,7 +55,7 @@ public class Movable : MonoBehaviour
             transform.position = Vector3.LerpUnclamped(from, to, Easing(howfar));
             yield return null;
         } while (howfar != 1);
-        idle = true;
+        _idle = true;
 
 
 

@@ -32,21 +32,45 @@ public class Matchable : Movable
 
     private void OnMouseDown()
     {
-        _cursor.SelectFirst(this);
-        print("onmousedown");
+        if (!Idle)
+        {
+            return;
+        }
+        else
+        {
+            _cursor.SelectFirst(this);
+            print("onmousedown");
+
+        }
     }
 
     private void OnMouseUp()
     {
-        _cursor.SelectFirst(null);
-        print("onmouseup");
+        if (!Idle)
+        {
+            return;
+        }
+        else
+        {
+            _cursor.SelectFirst(null);
+            print("onmouseup");
+
+        }
 
     }
 
     private void OnMouseEnter()
     {
-        _cursor.SelectSecond(this);
-        print("onmouseenter");
+        if (!Idle)
+        {
+            return;
+        }
+        else
+        {
+            _cursor.SelectSecond(this);
+            print("onmouseenter");
+
+        }
 
     }
     public override string ToString()

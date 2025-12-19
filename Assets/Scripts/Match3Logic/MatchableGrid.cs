@@ -1,15 +1,18 @@
 using System.Collections;
 //using System.Numerics;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class MatchableGrid : GridSystem<Matchable>
 {
     [SerializeField] private Vector3 offscreenOffset;
     private MatchablePool _pool;
+    private ScoreManager _score;
 
     private void Start()
     {
         _pool = (MatchablePool)MatchablePool.Instance;
+        _score = ScoreManager.Instance;
     }
     public IEnumerator PopulateGrid(bool allowMatches = false)
     {
@@ -119,17 +122,17 @@ public class MatchableGrid : GridSystem<Matchable>
         matches[0] = GetMatch(copies[0]);
         matches[1] = GetMatch(copies[1]);
 
-        // TODO: complete match validation!
+
         if (matches[0] != null)
         {
             //resolve match
-            print(matches[0]);
+            yield return StartCoroutine(_score.ResolveMatch(matches[0]));
 
         }
         if (matches[1] != null)
         {
             //resolve match
-            print(matches[1]);
+            yield return StartCoroutine(_score.ResolveMatch(matches[1]));
 
         }
         //if there's no match, swap them back

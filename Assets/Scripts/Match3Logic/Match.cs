@@ -1,8 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public enum Orientation
+{
+    none,
+    horizontal,
+    vertical,
+    both
+
+}
+
 public class Match //component olarak kullanmayacağımız için monobehaviour olmasına gerek yok
 {
+
+    private int _unlisted = 0;
+    public Orientation orientation = Orientation.none;
+
     private List<Matchable> _matchables;
     public List<Matchable> Matchables
     {
@@ -16,8 +30,13 @@ public class Match //component olarak kullanmayacağımız için monobehaviour o
     {
         get
         {
-            return _matchables.Count;
+            return _matchables.Count + _unlisted;
         }
+    }
+
+    public bool Contains(Matchable toCompare)
+    {
+        return _matchables.Contains(toCompare);
     }
 
     //constructor
@@ -35,6 +54,11 @@ public class Match //component olarak kullanmayacağımız için monobehaviour o
     {
         _matchables.Add(toAdd);
 
+    }
+
+    public void AddUnlisted()
+    {
+        ++_unlisted;
     }
 
     public void Merge(Match toMerge)

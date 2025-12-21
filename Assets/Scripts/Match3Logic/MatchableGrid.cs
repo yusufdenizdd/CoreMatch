@@ -278,19 +278,28 @@ public class MatchableGrid : GridSystem<Matchable>
         Match horizontalMatch;
         Match verticalMatch;
 
-        horizontalMatch = GetMatchesInDirection(toMatch, Vector2Int.left);
-        horizontalMatch.Merge(GetMatchesInDirection(toMatch, Vector2Int.right));
+        horizontalMatch = GetMatchesInDirection(match, toMatch, Vector2Int.left);
+        horizontalMatch.Merge(GetMatchesInDirection(match, toMatch, Vector2Int.right));
+
+        horizontalMatch.orientation = Orientation.horizontal;
 
         if (horizontalMatch.Count > 1)
         {
             match.Merge(horizontalMatch);
+            //then scan for vertical branches
+            GetBranches(match, horizontalMatch, Orientation.vertical);
 
         }
-        verticalMatch = GetMatchesInDirection(toMatch, Vector2Int.up);
-        verticalMatch.Merge(GetMatchesInDirection(toMatch, Vector2Int.down));
+        verticalMatch = GetMatchesInDirection(match, toMatch, Vector2Int.up);
+        verticalMatch.Merge(GetMatchesInDirection(match, toMatch, Vector2Int.down));
+
+        verticalMatch.orientation = Orientation.vertical;
+
         if (verticalMatch.Count > 1)
         {
             match.Merge(verticalMatch);
+            //then scan for horizontal branches
+            GetBranches(match, verticalMatch, Orientation.horizontal);
 
         }
 
@@ -303,7 +312,7 @@ public class MatchableGrid : GridSystem<Matchable>
     }
 
     // add each matching matchable in the direction to a match and return it
-    private Match GetMatchesInDirection(Matchable toMatch, Vector2Int direction)
+    private Match GetMatchesInDirection(Match tree, Matchable toMatch, Vector2Int direction)
     {
         Match match = new Match();
         Vector2Int position = toMatch.position + direction;
@@ -314,13 +323,40 @@ public class MatchableGrid : GridSystem<Matchable>
             next = GetItemAt(position);
             if (next.Type == toMatch.Type && next.Idle)
             {
-                match.AddMatchable(next);
+                if (!tree.Contains(next))
+                {
+                    match.AddMatchable(next);
+                }
+                else
+                {
+                    match.AddUnlisted();
+                }
                 position += direction;
             }
             else { break; }
 
         }
         return match;
+    }
+
+    private void GetBranches(Match tree, Match branchToSearch, Orientation prependicular)
+    {
+        Match branch;
+
+        foreach (Matchable matchable in branchToSearch.Matchables)
+        {
+            branch = GetMatchesInDirection(tree, matchable, prependicular == Orientation.horizontal ? Vector2Int.left : Vector2Int.down);
+            branch.Merge(GetMatchesInDirection(tree, matchable, prependicular == Orientation.horizontal ? Vector2Int.right : Vector2Int.up));
+
+            branch.orientation = prependicular;
+
+            if (branch.Count > 1)
+            {
+                tree.Merge(branch);
+                GetBranches(tree, branch, prependicular == Orientation.horizontal ? Orientation.vertical : Orientation.horizontal);
+            }
+
+        }
     }
     private IEnumerator Swap(Matchable[] toBeSwapped)
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Matchable : Movable
 {
@@ -38,13 +39,28 @@ public class Matchable : Movable
         //draw avove orthers in the grid
         _spriteRenderer.sortingOrder = 2;
         //move off the grid to a collection point
-        yield return StartCoroutine(MoveToPosition(collectionPoint.position/* collection point*/));
+        yield return StartCoroutine(MoveToTransform(collectionPoint/* collection point*/));
         //reset
         _spriteRenderer.sortingOrder = 1;
 
         //return back to the pool
         _pool.ReturnObjectToPool(this);
 
+    }
+
+    //matchable'ın sprite'ını powerup sprite'ı yap
+    public Matchable Upgrade(Sprite powerupSprite)
+    {
+        _spriteRenderer.sprite = powerupSprite;
+        return this;
+    }
+
+    public int SortingOrder
+    {
+        set
+        {
+            _spriteRenderer.sortingOrder = value;
+        }
     }
 
     private void OnMouseDown()

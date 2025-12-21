@@ -60,6 +60,38 @@ public class Movable : MonoBehaviour
 
 
     }
+    // coroutine move from current position to transform
+    //üstteki metodun hareket halinde olan taşa doğru giden hali
+    public IEnumerator MoveToTransform(Transform target)
+    {
+        if (speed <= 0)
+        {
+            Debug.LogWarning("Speed must be a positive number.");
+        }
+        from = transform.position;
+        to = target.position;
+        howfar = 0;
+        _idle = false;
+
+
+
+        do
+        {
+            howfar += speed * Time.deltaTime;
+            if (howfar > 1)
+            {
+                howfar = 1;
+            }
+
+            to = target.position;
+            transform.position = Vector3.LerpUnclamped(from, to, Easing(howfar));
+            yield return null;
+        } while (howfar != 1);
+        _idle = true;
+
+
+
+    }
     private float Easing(float t)
     {
         return t * t;

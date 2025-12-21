@@ -6,6 +6,7 @@ using UnityEngine;
 public class ScoreManager : Singleton<ScoreManager>
 {
     private TMP_Text scoreText;
+    private MatchablePool _pool;
     private MatchableGrid _grid;
     [SerializeField] private Transform collectionPoint;
     private int _score;
@@ -21,11 +22,13 @@ public class ScoreManager : Singleton<ScoreManager>
     protected override void Init()
     {
         scoreText = GetComponent<TMP_Text>();
+
     }
 
     private void Start()
     {
         _grid = (MatchableGrid)MatchableGrid.Instance;
+        _pool = (MatchablePool)MatchablePool.Instance;
 
     }
 
@@ -38,6 +41,23 @@ public class ScoreManager : Singleton<ScoreManager>
     public IEnumerator ResolveMatch(Match toResolve)
     {
         Matchable matchable;
+        Matchable powerup = null;
+
+        Transform target = collectionPoint;
+
+        //powerup
+        if (toResolve.Count > 3)
+        {
+
+            powerup = _pool.UpgradeMatchable(toResolve.ToBeUpgraded, toResolve.GetMatchType);
+            toResolve.RemoveMatchable(powerup);
+
+            target = powerup.transform;
+
+            powerup.SortingOrder = 3;
+        }
+
+
         for (int i = 0; i < toResolve.Count; i++)
         {
             matchable = toResolve.Matchables[i];
@@ -47,11 +67,11 @@ public class ScoreManager : Singleton<ScoreManager>
             //move them off to the side of the screen
             if (i == toResolve.Count - 1)
             {
-                yield return StartCoroutine(matchable.Resolve(collectionPoint));
+                yield return StartCoroutine(matchable.Resolve(target));
             }
             else
             {
-                StartCoroutine(matchable.Resolve(collectionPoint));
+                StartCoroutine(matchable.Resolve(target));
             }
 
 
@@ -60,6 +80,11 @@ public class ScoreManager : Singleton<ScoreManager>
 
         //update the player's score
         AddScore(toResolve.Count * toResolve.Count);
+
+        if (powerup != null)
+        {
+            powerup.SortingOrder = 3;
+        }
 
 
 

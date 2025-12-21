@@ -731,6 +731,8 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0.9400835, a: 1}
   - {r: 0, g: 0.3147986, b: 1, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
+  match4Powerup: {fileID: 6273225822489713382, guid: 7cfd9aa34a78046879c99f5e99f9ead9, type: 3}
+  match5Powerup: {fileID: 6027911187540862846, guid: 7cfd9aa34a78046879c99f5e99f9ead9, type: 3}
 --- !u!4 &1084158735
 Transform:
   m_ObjectHideFlags: 0

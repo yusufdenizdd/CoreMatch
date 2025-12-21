@@ -11,11 +11,21 @@ public enum Orientation
 
 }
 
+public enum MatchType
+{
+    invalid,
+    match3,
+    match4,
+    match5,
+    cross
+}
+
 public class Match //component olarak kullanmayacağımız için monobehaviour olmasına gerek yok
 {
 
     private int _unlisted = 0;
     public Orientation orientation = Orientation.none;
+    private Matchable _toBeUpgraded;
 
     private List<Matchable> _matchables;
     public List<Matchable> Matchables
@@ -34,6 +44,33 @@ public class Match //component olarak kullanmayacağımız için monobehaviour o
         }
     }
 
+    public MatchType GetMatchType
+    {
+        get
+        {
+            if (orientation == Orientation.both)
+            {
+                return MatchType.cross;
+            }
+            else if (_matchables.Count == 3)
+            {
+                return MatchType.match3;
+            }
+            else if (_matchables.Count == 4)
+            {
+                return MatchType.match4;
+            }
+            else if (_matchables.Count > 4)
+            {
+                return MatchType.match5;
+            }
+            else
+            {
+                return MatchType.invalid;
+            }
+        }
+    }
+
     public bool Contains(Matchable toCompare)
     {
         return _matchables.Contains(toCompare);
@@ -48,8 +85,20 @@ public class Match //component olarak kullanmayacağımız için monobehaviour o
     public Match(Matchable original) : this()
     {
         AddMatchable(original);
+        _toBeUpgraded = original;
     }
 
+    public Matchable ToBeUpgraded
+    {
+        get
+        {
+            if (_toBeUpgraded != null)
+            {
+                return _toBeUpgraded;
+            }
+            return _matchables[Random.Range(0, _matchables.Count)];
+        }
+    }
     public void AddMatchable(Matchable toAdd)
     {
         _matchables.Add(toAdd);
@@ -61,9 +110,28 @@ public class Match //component olarak kullanmayacağımız için monobehaviour o
         ++_unlisted;
     }
 
+    public void RemoveMatchable(Matchable toBeRemoved)
+    {
+        _matchables.Remove(toBeRemoved);
+
+    }
+
     public void Merge(Match toMerge)
     {
         _matchables.AddRange(toMerge._matchables);
+
+        if (orientation == Orientation.both || toMerge.orientation == Orientation.both || (orientation == Orientation.horizontal && toMerge.orientation == Orientation.vertical) || (orientation == Orientation.vertical && toMerge.orientation == Orientation.horizontal))
+        {
+            orientation = Orientation.both;
+        }
+        else if (toMerge.orientation == Orientation.horizontal)
+        {
+            orientation = Orientation.horizontal;
+        }
+        else if (toMerge.orientation == Orientation.vertical)
+        {
+            orientation = Orientation.vertical;
+        }
     }
     public override string ToString()
     {

@@ -144,6 +144,27 @@ public class MatchableGrid : GridSystem<Matchable>
         // yield until matchables animate swapping
         yield return StartCoroutine(Swap(copies));
 
+        //match5 için özel kurallar (match5'i eşleştirdiğimz taşın rengindeki her şey yok olsun)
+        if (copies[0].IsGem && copies[1].IsGem)
+        {
+            //ikisi de match5 ise hayat biticek
+            MatchEverything();
+            yield break;
+
+        }
+        if (copies[0].IsGem)
+        {
+            MatchEverythingByType(copies[0], copies[1].Type);
+            yield break;
+
+        }
+        else if (copies[1].IsGem)
+        {
+            MatchEverythingByType(copies[1], copies[0].Type);
+            yield break;
+
+        }
+
         //check for a valid match
         Match[] matches = new Match[2];
 
@@ -227,6 +248,50 @@ public class MatchableGrid : GridSystem<Matchable>
         return madeAMatch;
     }
 
+    //komşuları patlat (match4)
+    public void MatchAllAdjacent(Matchable powerup)
+    {
+        Match allAdjacent = new Match();
+
+        for (int y = powerup.position.y - 1; y < powerup.position.y + 2; y++)
+        {
+            for (int x = powerup.position.x - 1; x < powerup.position.x + 2; x++)
+            {
+                if (CheckBounds(x, y) && !IsEmpty(x, y) && GetItemAt(x, y).Idle)
+                {
+                    allAdjacent.AddMatchable(GetItemAt(x, y));
+                }
+
+            }
+        }
+        StartCoroutine(_score.ResolveMatch(allAdjacent, MatchType.match4));
+    }
+
+    //+ şeklinde yatay ve dikeydeki her şeyi patlat (cross)
+    public void MatchRowAndColumn(Matchable powerup)
+    {
+        Match rowAndColumn = new Match();
+        for (int y = 0; y < Dimensions.y; y++)
+        {
+            if (CheckBounds(powerup.position.x, y) && !IsEmpty(powerup.position.x, y) && GetItemAt(powerup.position.x, y).Idle)
+            {
+                rowAndColumn.AddMatchable(GetItemAt(powerup.position.x, y));
+            }
+
+        }
+
+        for (int x = 0; x < Dimensions.x; x++)
+        {
+            if (CheckBounds(x, powerup.position.y) && !IsEmpty(x, powerup.position.y) && GetItemAt(x, powerup.position.y).Idle)
+            {
+                rowAndColumn.AddMatchable(GetItemAt(x, powerup.position.y));
+            }
+
+        }
+
+
+        StartCoroutine(_score.ResolveMatch(rowAndColumn, MatchType.cross));
+    }
     private void CollapseGrid()
     {
         // soldan sağa her sütunu aşağıdan yukarıya tarıyor, boş yer bulunca yukarıya doğru boş olmayan yer bulana kadar taramaya devam ediyor
@@ -378,5 +443,49 @@ public class MatchableGrid : GridSystem<Matchable>
         //move them to their new positions on screen
         StartCoroutine(toBeSwapped[0].MoveToPosition(worldPosition[1]));
         yield return StartCoroutine(toBeSwapped[1].MoveToPosition(worldPosition[0]));
+    }
+
+    //hayatı bitir
+    public void MatchEverything()
+    {
+        Match everything = new Match();
+        for (int y = 0; y < Dimensions.y; y++)
+        {
+            for (int x = 0; x < Dimensions.x; x++)
+            {
+                if (CheckBounds(x, y) && !IsEmpty(x, y) && GetItemAt(x, y).Idle)
+                {
+                    everything.AddMatchable(GetItemAt(x, y));
+                }
+
+            }
+
+        }
+
+        StartCoroutine(_score.ResolveMatch(everything, MatchType.match5));
+        StartCoroutine(FillAndScanGrid());
+
+    }
+
+    //tek renkteki her şeyi bitir
+    public void MatchEverythingByType(Matchable gem, int type)
+    {
+        Match everythingByType = new Match(gem);
+        for (int y = 0; y < Dimensions.y; y++)
+        {
+            for (int x = 0; x < Dimensions.x; x++)
+            {
+                if (CheckBounds(x, y) && !IsEmpty(x, y) && GetItemAt(x, y).Idle && GetItemAt(x, y).Type == type)
+                {
+                    everythingByType.AddMatchable(GetItemAt(x, y));
+                }
+
+            }
+
+        }
+
+        StartCoroutine(_score.ResolveMatch(everythingByType, MatchType.match5));
+        StartCoroutine(FillAndScanGrid());
+
     }
 }

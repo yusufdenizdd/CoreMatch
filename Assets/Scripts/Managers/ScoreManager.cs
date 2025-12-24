@@ -38,29 +38,38 @@ public class ScoreManager : Singleton<ScoreManager>
         scoreText.text = "Score: " + _score;
     }
 
-    public IEnumerator ResolveMatch(Match toResolve)
+    public IEnumerator ResolveMatch(Match toResolve, MatchType powerupUsed = MatchType.invalid)
     {
         Matchable matchable;
-        Matchable powerup = null;
+        Matchable powerupFormed = null;
 
         Transform target = collectionPoint;
 
-        //powerup
-        if (toResolve.Count > 3)
+        //powerup (zaten bir powerup sonucu resolve ediyorsak tekrar powerup oluşturmasın)
+        if (powerupUsed == MatchType.invalid && toResolve.Count > 3)
         {
 
-            powerup = _pool.UpgradeMatchable(toResolve.ToBeUpgraded, toResolve.GetMatchType);
-            toResolve.RemoveMatchable(powerup);
+            powerupFormed = _pool.UpgradeMatchable(toResolve.ToBeUpgraded, toResolve.GetMatchType);
+            toResolve.RemoveMatchable(powerupFormed);
 
-            target = powerup.transform;
+            target = powerupFormed.transform;
 
-            powerup.SortingOrder = 3;
+            powerupFormed.SortingOrder = 3;
         }
 
 
         for (int i = 0; i < toResolve.Count; i++)
         {
             matchable = toResolve.Matchables[i];
+
+            //match5 powerup'ı mı kontrol et, match5 powerup ise resolve veya remove yapma
+            if (powerupUsed != MatchType.match5 && matchable.IsGem)
+            {
+                continue;
+            }
+
+
+
             // remove the matchables from the grid
             _grid.RemoveItemAt(matchable.position);
 
@@ -81,9 +90,9 @@ public class ScoreManager : Singleton<ScoreManager>
         //update the player's score
         AddScore(toResolve.Count * toResolve.Count);
 
-        if (powerup != null)
+        if (powerupFormed != null)
         {
-            powerup.SortingOrder = 3;
+            powerupFormed.SortingOrder = 3;
         }
 
 

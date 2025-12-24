@@ -21,7 +21,7 @@ public class Movable : MonoBehaviour
     private Vector3 from;
     private Vector3 to;
     private float howfar;
-    private bool _idle = true;
+    protected bool _idle = true;
     public bool Idle
     {
         get

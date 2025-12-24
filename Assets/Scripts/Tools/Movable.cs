@@ -21,12 +21,12 @@ public class Movable : MonoBehaviour
     private Vector3 from;
     private Vector3 to;
     private float howfar;
-    private bool idle = true;
+    protected bool _idle = true;
     public bool Idle
     {
         get
         {
-            return idle;
+            return _idle;
         }
     }
     [SerializeField] private float speed = 1;
@@ -41,7 +41,7 @@ public class Movable : MonoBehaviour
         from = transform.position;
         to = targetPosition;
         howfar = 0;
-        idle = false;
+        _idle = false;
 
 
 
@@ -55,7 +55,39 @@ public class Movable : MonoBehaviour
             transform.position = Vector3.LerpUnclamped(from, to, Easing(howfar));
             yield return null;
         } while (howfar != 1);
-        idle = true;
+        _idle = true;
+
+
+
+    }
+    // coroutine move from current position to transform
+    //üstteki metodun hareket halinde olan taşa doğru giden hali
+    public IEnumerator MoveToTransform(Transform target)
+    {
+        if (speed <= 0)
+        {
+            Debug.LogWarning("Speed must be a positive number.");
+        }
+        from = transform.position;
+        to = target.position;
+        howfar = 0;
+        _idle = false;
+
+
+
+        do
+        {
+            howfar += speed * Time.deltaTime;
+            if (howfar > 1)
+            {
+                howfar = 1;
+            }
+
+            to = target.position;
+            transform.position = Vector3.LerpUnclamped(from, to, Easing(howfar));
+            yield return null;
+        } while (howfar != 1);
+        _idle = true;
 
 
 

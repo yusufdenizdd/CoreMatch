@@ -1,6 +1,9 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using System;
+
+
 
 [RequireComponent(typeof(TMP_Text))]
 public class ScoreManager : Singleton<ScoreManager>
@@ -10,7 +13,9 @@ public class ScoreManager : Singleton<ScoreManager>
     private MatchableGrid _grid;
     [SerializeField] private Transform collectionPoint;
     private int _score;
-
+    //Muhsina yaptığı değişiklikler
+    public event Action<int> OnScoreChanged;
+    //Muhsina yaptığı değişiklikler    
     public int Score
     {
         get
@@ -31,11 +36,19 @@ public class ScoreManager : Singleton<ScoreManager>
         _pool = (MatchablePool)MatchablePool.Instance;
 
     }
-
+    //Muhsina yaptığı değişiklikler
+    public void ResetScore()
+    {
+        _score = 0;
+        scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score);
+    }
+    //Muhsina yaptığı değişiklikler
     public void AddScore(int amount)
     {
         _score += amount;
         scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score); // muhsina ekledi
     }
 
     public IEnumerator ResolveMatch(Match toResolve, MatchType powerupUsed = MatchType.invalid)

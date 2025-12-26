@@ -488,4 +488,39 @@ public class MatchableGrid : GridSystem<Matchable>
         StartCoroutine(FillAndScanGrid());
 
     }
+
+    // Muhsina ekledi
+    public IEnumerator ResetGrid(bool allowMatchesOnStart = false)
+    {
+        // Devam eden swap/fill/scan coroutineleri varsa çakışmasın:
+        StopAllCoroutines();
+
+        // 1) Griddeki tüm taşları pool’a iade et
+        for (int y = 0; y < Dimensions.y; y++)
+        {
+            for (int x = 0; x < Dimensions.x; x++)
+            {
+                if (!IsEmpty(x, y))
+                {
+                    Matchable m = GetItemAt(x, y);
+
+                    // grid datasından kaldır
+                    RemoveItemAt(x, y);
+
+                    // havuza gönder (animasyonsuz hızlı reset)
+                    _pool.ReturnObjectToPool(m);
+                }
+            }
+        }
+
+        // 2) Grid datasını tamamen temizle
+        Clear();
+
+        // 3) Yeniden doldur
+        yield return StartCoroutine(PopulateGrid(allowMatchesOnStart, true));
+    }
+
+    //Muhsina ekledi
 }
+
+

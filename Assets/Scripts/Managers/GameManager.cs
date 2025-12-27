@@ -42,6 +42,15 @@ public class GameManager : Singleton<GameManager>
         StartCoroutine(_grid.PopulateGrid(false, true));
 
         //then remove the loading screen down here
+
+        //grid ilk başlatıldığında mümkün hamle var mı yok mu kontrol et nolur nolmaz
+        _grid.CheckPossibleMoves();
+    }
+
+    public void NoMoreMoves()
+    {
+        _grid.MatchEverything();
+
     }
 
 }

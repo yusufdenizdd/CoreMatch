@@ -30,6 +30,13 @@ public class Movable : MonoBehaviour
         }
     }
     [SerializeField] private float speed = 1;
+    public float Speed
+    {
+        get
+        {
+            return speed;
+        }
+    }
 
     // coroutine move from current position to new position
     public IEnumerator MoveToPosition(Vector3 targetPosition)

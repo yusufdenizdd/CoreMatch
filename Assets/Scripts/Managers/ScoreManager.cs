@@ -10,6 +10,7 @@ public class ScoreManager : Singleton<ScoreManager>
     [SerializeField] private TextMeshProUGUI scoreText;
     private MatchablePool _pool;
     private MatchableGrid _grid;
+    private AudioMixer _audioMixer;
     [SerializeField] private Transform collectionPoint;
     private int _score;
 
@@ -39,6 +40,7 @@ public class ScoreManager : Singleton<ScoreManager>
     {
         _grid = (MatchableGrid)MatchableGrid.Instance;
         _pool = (MatchablePool)MatchablePool.Instance;
+        _audioMixer = AudioMixer.Instance;
 
         comboText.enabled = false;
         comboSlider.gameObject.SetActive(false);
@@ -54,6 +56,7 @@ public class ScoreManager : Singleton<ScoreManager>
         {
             StartCoroutine(ComboTimer());
         }
+        _audioMixer.PlaySound(SoundEffects.score);
 
     }
     private IEnumerator ComboTimer()
@@ -99,6 +102,11 @@ public class ScoreManager : Singleton<ScoreManager>
             target = powerupFormed.transform;
 
             powerupFormed.SortingOrder = 3;
+            _audioMixer.PlaySound(SoundEffects.upgrade);
+        }
+        else
+        {
+            _audioMixer.PlaySound(SoundEffects.resolve);
         }
 
 

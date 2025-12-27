@@ -14,12 +14,14 @@ public class MatchableGrid : GridSystem<Matchable>
     private ScoreManager _score;
 
     private Hint _hint;
+    private AudioMixer _audioMixer;
 
     private void Start()
     {
         _pool = (MatchablePool)MatchablePool.Instance;
         _score = ScoreManager.Instance;
         _hint = Hint.Instance;
+        _audioMixer = AudioMixer.Instance;
     }
     public IEnumerator PopulateGrid(bool allowMatches = false, bool initialPopulation = false)
     {
@@ -73,6 +75,8 @@ public class MatchableGrid : GridSystem<Matchable>
         for (int i = 0; i < newMatchables.Count; i++)
         {
             onscreenPosition = transform.position + new Vector3(newMatchables[i].position.x, newMatchables[i].position.y);
+
+            _audioMixer.PlayDelayedSound(SoundEffects.land, 1f / newMatchables[i].Speed);
 
             if (i == newMatchables.Count - 1)
             {
@@ -300,6 +304,8 @@ public class MatchableGrid : GridSystem<Matchable>
             }
         }
         StartCoroutine(_score.ResolveMatch(allAdjacent, MatchType.match4));
+
+        _audioMixer.PlaySound(SoundEffects.powerup);
     }
 
     //+ şeklinde yatay ve dikeydeki her şeyi patlat (cross)
@@ -326,6 +332,8 @@ public class MatchableGrid : GridSystem<Matchable>
 
 
         StartCoroutine(_score.ResolveMatch(rowAndColumn, MatchType.cross));
+
+        _audioMixer.PlaySound(SoundEffects.powerup);
     }
     private void CollapseGrid()
     {
@@ -368,6 +376,9 @@ public class MatchableGrid : GridSystem<Matchable>
 
         // start the animation
         StartCoroutine(toMove.MoveToPosition(transform.position + new Vector3(x, y)));
+
+        _audioMixer.PlayDelayedSound(SoundEffects.land, 1f / toMove.Speed);
+
 
     }
 
@@ -474,6 +485,8 @@ public class MatchableGrid : GridSystem<Matchable>
         worldPosition[0] = toBeSwapped[0].transform.position;
         worldPosition[1] = toBeSwapped[1].transform.position;
 
+        _audioMixer.PlaySound(SoundEffects.swap);
+
 
         //move them to their new positions on screen
         StartCoroutine(toBeSwapped[0].MoveToPosition(worldPosition[1]));
@@ -500,6 +513,8 @@ public class MatchableGrid : GridSystem<Matchable>
         yield return StartCoroutine(_score.ResolveMatch(everything, MatchType.match5));
         StartCoroutine(FillAndScanGrid());
 
+        _audioMixer.PlaySound(SoundEffects.powerup);
+
     }
 
     //tek renkteki her şeyi bitir
@@ -521,6 +536,8 @@ public class MatchableGrid : GridSystem<Matchable>
 
         yield return StartCoroutine(_score.ResolveMatch(everythingByType, MatchType.match5));
         StartCoroutine(FillAndScanGrid());
+
+        _audioMixer.PlaySound(SoundEffects.powerup);
 
     }
 

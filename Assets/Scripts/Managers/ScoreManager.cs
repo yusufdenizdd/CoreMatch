@@ -1,11 +1,13 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(TMP_Text))]
+[RequireComponent(typeof(TextMeshProUGUI))]
 public class ScoreManager : Singleton<ScoreManager>
 {
-    private TMP_Text scoreText;
+    [SerializeField] private TextMeshProUGUI comboText;
+    [SerializeField] private TextMeshProUGUI scoreText;
     private MatchablePool _pool;
     private MatchableGrid _grid;
     [SerializeField] private Transform collectionPoint;
@@ -19,25 +21,67 @@ public class ScoreManager : Singleton<ScoreManager>
         }
     }
 
-    protected override void Init()
-    {
-        scoreText = GetComponent<TMP_Text>();
+    private float _timeSinceLastScore;
+    [SerializeField] private float maxComboTime;
+    [SerializeField] private float currentComboTime;
+    private int _comboMultiplier;
 
-    }
+    private bool _timerIsActive;
+    /*protected override void Init()
+    {
+        //scoreText = GetComponent<TMP_Text>();
+
+    }*/
+
+    [SerializeField] private Slider comboSlider;
 
     private void Start()
     {
         _grid = (MatchableGrid)MatchableGrid.Instance;
         _pool = (MatchablePool)MatchablePool.Instance;
 
+        comboText.enabled = false;
+        comboSlider.gameObject.SetActive(false);
+
     }
 
     public void AddScore(int amount)
     {
-        _score += amount;
+        _score += amount * IncreaseCombo();
         scoreText.text = "Score: " + _score;
-    }
+        _timeSinceLastScore = 0;
+        if (!_timerIsActive)
+        {
+            StartCoroutine(ComboTimer());
+        }
 
+    }
+    private IEnumerator ComboTimer()
+    {
+        _timerIsActive = true;
+        comboText.enabled = true;
+        comboSlider.gameObject.SetActive(true);
+
+        do
+        {
+            _timeSinceLastScore += Time.deltaTime;
+            comboSlider.value = 1 - (_timeSinceLastScore / maxComboTime);
+
+            yield return null;
+        } while (_timeSinceLastScore < currentComboTime);
+        _comboMultiplier = 0;
+        comboText.enabled = false;
+        comboSlider.gameObject.SetActive(false);
+        _timerIsActive = false;
+
+    }
+    private int IncreaseCombo()
+    {
+        comboText.text = "Combo x" + ++_comboMultiplier;
+        currentComboTime = maxComboTime - Mathf.Log(_comboMultiplier) / 2;
+        return _comboMultiplier;
+
+    }
     public IEnumerator ResolveMatch(Match toResolve, MatchType powerupUsed = MatchType.invalid)
     {
         Matchable matchable;

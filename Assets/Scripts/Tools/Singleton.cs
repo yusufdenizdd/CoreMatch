@@ -21,6 +21,8 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
         }
     }
 
+    public static bool HasInstance => _instance != null;
+
     //create reference in Awake()
     protected void Awake()
     {

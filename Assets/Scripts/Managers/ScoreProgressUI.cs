@@ -33,7 +33,7 @@ public class ScoreProgressUI : MonoBehaviour
         if (bindRoutine != null) StopCoroutine(bindRoutine);
         if (animRoutine != null) StopCoroutine(animRoutine);
 
-        if (ScoreManager.Instance != null)
+        if (ScoreManager.HasInstance)
             ScoreManager.Instance.OnScoreChanged -= UpdateBar;
             
         if (lm != null)

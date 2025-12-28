@@ -10,6 +10,10 @@ public class GameManager : Singleton<GameManager>
 {
     private MatchablePool _pool;
     private MatchableGrid _grid;
+    private Cursor _cursor;
+    private AudioMixer _audioMixer;
+
+    [SerializeField] private Fader loadingScreen;
 
     // the dimensions of the matchable grid, set in the inspector
     [SerializeField] private Vector2Int dimensions = Vector2Int.one;
@@ -26,6 +30,8 @@ public class GameManager : Singleton<GameManager>
         // get references to other important game objects
         _pool = (MatchablePool)MatchablePool.Instance;
         _grid = (MatchableGrid)MatchableGrid.Instance;
+        _cursor = Cursor.Instance;
+        _audioMixer = AudioMixer.Instance;
 
 
         // set up the scene
@@ -33,7 +39,11 @@ public class GameManager : Singleton<GameManager>
     }
     private IEnumerator Setup()
     {
-        //It's a good idea to put a loading screen here
+        //disable user input
+        _cursor.enabled = false;
+
+        //loading screen
+        loadingScreen.Hide(false);
 
         //pool the matchables
         _pool.PoolObjects(dimensions.x * dimensions.y * 2);
@@ -41,11 +51,31 @@ public class GameManager : Singleton<GameManager>
         //create the grid
         _grid.InitializeGrid(dimensions);
 
+        //loading screen'i kaldır
+        //loadingScreen.Hide(true);
+        StartCoroutine(loadingScreen.Fade(0));
+
+        //background music başlat
+        _audioMixer.PlayMusic();
+
+
+
         yield return null;
 
-        StartCoroutine(_grid.PopulateGrid(false, true));
+        yield return StartCoroutine(_grid.PopulateGrid(false, true));
 
-        //then remove the loading screen down here
+
+        //grid ilk başlatıldığında mümkün hamle var mı yok mu kontrol et nolur nolmaz
+        _grid.CheckPossibleMoves();
+
+        //user input'u enable yap
+        _cursor.enabled = true;
+    }
+
+    public void NoMoreMoves()
+    {
+        StartCoroutine(_grid.MatchEverything());
+
     }
 
 }

@@ -1,58 +1,90 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using System;
+using UnityEngine.UI;
 
-public class ScoreManager : MonoBehaviour
+[RequireComponent(typeof(TextMeshProUGUI))]
+public class ScoreManager : Singleton<ScoreManager>
 {
-    public static ScoreManager Instance { get; private set; }
-
-    private TMP_Text scoreText;
+    [SerializeField] private TextMeshProUGUI comboText;
+    [SerializeField] private TextMeshProUGUI scoreText;
     private MatchablePool _pool;
     private MatchableGrid _grid;
-
+    private AudioMixer _audioMixer;
     [SerializeField] private Transform collectionPoint;
-
     private int _score;
-    public event Action<int> OnScoreChanged;
 
-    public int Score => _score;
-
-    private void Awake()
+    public int Score
     {
-        if (Instance != null && Instance != this)
+        get
         {
-            Destroy(gameObject);
-            return;
+            return _score;
         }
-
-        Instance = this;
-
-        scoreText = GetComponent<TMP_Text>();
-        if (scoreText == null)
-            Debug.LogError("ScoreManager aynı objede TMP_Text bulamadı. ScoreManager'ı TMP Text objesine eklediğinden emin ol.");
     }
+
+    private float _timeSinceLastScore;
+    [SerializeField] private float maxComboTime;
+    [SerializeField] private float currentComboTime;
+    private int _comboMultiplier;
+
+    private bool _timerIsActive;
+    /*protected override void Init()
+    {
+        //scoreText = GetComponent<TMP_Text>();
+
+    }*/
+
+    [SerializeField] private Slider comboSlider;
 
     private void Start()
     {
         _grid = (MatchableGrid)MatchableGrid.Instance;
         _pool = (MatchablePool)MatchablePool.Instance;
-    }
+        _audioMixer = AudioMixer.Instance;
 
-    public void ResetScore()
-    {
-        _score = 0;
-        if (scoreText) scoreText.text = "Score: " + _score;
-        OnScoreChanged?.Invoke(_score);
+        comboText.enabled = false;
+        comboSlider.gameObject.SetActive(false);
+
     }
 
     public void AddScore(int amount)
     {
-        _score += amount;
-        if (scoreText) scoreText.text = "Score: " + _score;
-        OnScoreChanged?.Invoke(_score);
-    }
+        _score += amount * IncreaseCombo();
+        scoreText.text = "Score: " + _score;
+        _timeSinceLastScore = 0;
+        if (!_timerIsActive)
+        {
+            StartCoroutine(ComboTimer());
+        }
+        _audioMixer.PlaySound(SoundEffects.score);
 
+    }
+    private IEnumerator ComboTimer()
+    {
+        _timerIsActive = true;
+        comboText.enabled = true;
+        comboSlider.gameObject.SetActive(true);
+
+        do
+        {
+            _timeSinceLastScore += Time.deltaTime;
+            comboSlider.value = 1 - (_timeSinceLastScore / maxComboTime);
+
+            yield return null;
+        } while (_timeSinceLastScore < currentComboTime);
+        _comboMultiplier = 0;
+        comboText.enabled = false;
+        comboSlider.gameObject.SetActive(false);
+        _timerIsActive = false;
+
+    }
+    private int IncreaseCombo()
+    {
+        comboText.text = "Combo x" + ++_comboMultiplier;
+        currentComboTime = maxComboTime - Mathf.Log(_comboMultiplier) / 2;
+        return _comboMultiplier;
+
+    }
     public IEnumerator ResolveMatch(Match toResolve, MatchType powerupUsed = MatchType.invalid)
     {
         Matchable matchable;
@@ -60,35 +92,66 @@ public class ScoreManager : MonoBehaviour
 
         Transform target = collectionPoint;
 
+        //powerup (zaten bir powerup sonucu resolve ediyorsak tekrar powerup oluşturmasın)
         if (powerupUsed == MatchType.invalid && toResolve.Count > 3)
         {
+
             powerupFormed = _pool.UpgradeMatchable(toResolve.ToBeUpgraded, toResolve.GetMatchType);
             toResolve.RemoveMatchable(powerupFormed);
 
             target = powerupFormed.transform;
+
             powerupFormed.SortingOrder = 3;
+            _audioMixer.PlaySound(SoundEffects.upgrade);
         }
+        else
+        {
+            _audioMixer.PlaySound(SoundEffects.resolve);
+        }
+
 
         for (int i = 0; i < toResolve.Count; i++)
         {
             matchable = toResolve.Matchables[i];
 
+            //match5 powerup'ı mı kontrol et, match5 powerup ise resolve veya remove yapma
             if (powerupUsed != MatchType.match5 && matchable.IsGem)
+            {
                 continue;
+            }
 
+
+
+            // remove the matchables from the grid
             _grid.RemoveItemAt(matchable.position);
 
+            //move them off to the side of the screen
             if (i == toResolve.Count - 1)
+            {
                 yield return StartCoroutine(matchable.Resolve(target));
+            }
             else
+            {
                 StartCoroutine(matchable.Resolve(target));
+            }
+
+
+
         }
 
+        //update the player's score
         AddScore(toResolve.Count * toResolve.Count);
 
         if (powerupFormed != null)
+        {
             powerupFormed.SortingOrder = 3;
+        }
+
+
 
         yield return null;
     }
+
+
 }
+

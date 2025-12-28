@@ -124,6 +124,9 @@ public class Matchable : Movable
 
     private void OnMouseDown()
     {
+        // 1. Level oynanmıyorsa (Panel açıksa vs.) tıklamayı engelle
+        if (LevelManager.Instance != null && !LevelManager.Instance.IsPlaying) return;
+
         if (!Idle)
         {
             return;

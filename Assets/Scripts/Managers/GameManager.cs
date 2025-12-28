@@ -55,8 +55,13 @@ public class GameManager : Singleton<GameManager>
         _audioMixer.PlayMusic();
 
 
-
-        yield return null;
+        // Eğer LevelManager varsa, oyun akışını o yönetsin (StartLevel çağıracak)
+        if (LevelManager.Instance != null)
+        {
+            // LevelManager grid'i kendisi populate edip başlatacak
+            LevelManager.Instance.BeginGame();
+            yield break;
+        }
 
         yield return StartCoroutine(_grid.PopulateGrid(false, true));
 

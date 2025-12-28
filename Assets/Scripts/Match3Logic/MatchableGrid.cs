@@ -23,6 +23,27 @@ public class MatchableGrid : GridSystem<Matchable>
         _hint = Hint.Instance;
         _audioMixer = AudioMixer.Instance;
     }
+
+    public IEnumerator ResetGrid(bool allowMatches)
+    {
+        // Reset grid logic for LevelManager
+        // 1. Deactivate all
+        for (int y = 0; y < Dimensions.y; y++)
+        {
+            for (int x = 0; x < Dimensions.x; x++)
+            {
+                if (CheckBounds(x, y) && !IsEmpty(x, y))
+                {
+                    Matchable item = GetItemAt(x, y);
+                    item.gameObject.SetActive(false); // Return to pool implicitly by hiding
+                    RemoveItemAt(x, y);
+                }
+            }
+        }
+        
+        // 2. Repopulate
+        yield return StartCoroutine(PopulateGrid(allowMatches, true));
+    }
     public IEnumerator PopulateGrid(bool allowMatches = false, bool initialPopulation = false)
     {
         List<Matchable> newMatchables = new List<Matchable>();
@@ -161,18 +182,21 @@ public class MatchableGrid : GridSystem<Matchable>
         if (copies[0].IsGem && copies[1].IsGem)
         {
             //ikisi de match5 ise hayat biticek
+            if (LevelManager.Instance != null && LevelManager.Instance.IsPlaying) LevelManager.Instance.OnMoveUsed();
             yield return MatchEverything();
             yield break;
 
         }
         if (copies[0].IsGem)
         {
+            if (LevelManager.Instance != null && LevelManager.Instance.IsPlaying) LevelManager.Instance.OnMoveUsed();
             yield return MatchEverythingByType(copies[0], copies[1].Type);
             yield break;
 
         }
         else if (copies[1].IsGem)
         {
+            if (LevelManager.Instance != null && LevelManager.Instance.IsPlaying) LevelManager.Instance.OnMoveUsed();
             yield return MatchEverythingByType(copies[1], copies[0].Type);
             yield break;
 
@@ -197,6 +221,13 @@ public class MatchableGrid : GridSystem<Matchable>
             StartCoroutine(_score.ResolveMatch(matches[1]));
 
         }
+        
+        if (matches[0] != null || matches[1] != null)
+        {
+             if (LevelManager.Instance != null && LevelManager.Instance.IsPlaying) LevelManager.Instance.OnMoveUsed();
+        }
+
+        //if there's no match, swap them back
         //if there's no match, swap them back
         if (matches[0] == null && matches[1] == null)
         {
@@ -234,6 +265,9 @@ public class MatchableGrid : GridSystem<Matchable>
         else //chain reaction yoksa ve grid idle ise, mümkün hamle var mı kontrol et 
         {
             CheckPossibleMoves();
+            
+            // Notify LevelManager that board is settled
+            if (LevelManager.Instance != null) LevelManager.Instance.OnBoardSettled();
         }
 
     }

@@ -47,10 +47,19 @@ public class ScoreManager : Singleton<ScoreManager>
 
     }
 
+    public event System.Action<int> OnScoreChanged;
+    public void ResetScore()
+    {
+        _score = 0;
+        if (scoreText) scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score);
+    }
+
     public void AddScore(int amount)
     {
         _score += amount * IncreaseCombo();
         scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score);
         _timeSinceLastScore = 0;
         if (!_timerIsActive)
         {

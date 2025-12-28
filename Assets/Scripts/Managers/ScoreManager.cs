@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -11,6 +12,7 @@ public class ScoreManager : Singleton<ScoreManager>
     private MatchablePool _pool;
     private MatchableGrid _grid;
     private AudioMixer _audioMixer;
+    public event Action<int> OnScoreChanged;
     [SerializeField] private Transform collectionPoint;
     private int _score;
 
@@ -46,7 +48,12 @@ public class ScoreManager : Singleton<ScoreManager>
         comboSlider.gameObject.SetActive(false);
 
     }
-
+    public void ResetScore()
+    {
+        _score = 0;
+        if (scoreText) scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score);
+    }
     public void AddScore(int amount)
     {
         _score += amount * IncreaseCombo();
@@ -57,6 +64,8 @@ public class ScoreManager : Singleton<ScoreManager>
             StartCoroutine(ComboTimer());
         }
         _audioMixer.PlaySound(SoundEffects.score);
+
+        OnScoreChanged?.Invoke(_score);
 
     }
     private IEnumerator ComboTimer()

@@ -54,7 +54,7 @@ public class ScoreProgressUI : MonoBehaviour
         while (ScoreManager.Instance == null)
             yield return null;
 
-        lm = FindObjectOfType<LevelManagers>();
+        lm = FindFirstObjectByType<LevelManagers>();
         if (lm == null)
         {
             gameObject.SetActive(false);
@@ -72,7 +72,7 @@ public class ScoreProgressUI : MonoBehaviour
 
     private void UpdateBar(int score)
     {
-        if (lm == null) lm = FindObjectOfType<LevelManagers>();
+        if (lm == null) lm = FindFirstObjectByType<LevelManagers>();
         if (lm != null)
             maxScore = Mathf.Max(1, lm.CurrentTargetScore);
 

@@ -3,52 +3,54 @@ using TMPro;
 using UnityEngine;
 using System;
 
-
-
-[RequireComponent(typeof(TMP_Text))]
-public class ScoreManager : Singleton<ScoreManager>
+public class ScoreManager : MonoBehaviour
 {
+    public static ScoreManager Instance { get; private set; }
+
     private TMP_Text scoreText;
     private MatchablePool _pool;
     private MatchableGrid _grid;
+
     [SerializeField] private Transform collectionPoint;
+
     private int _score;
-    //Muhsina yaptığı değişiklikler
     public event Action<int> OnScoreChanged;
-    //Muhsina yaptığı değişiklikler    
-    public int Score
+
+    public int Score => _score;
+
+    private void Awake()
     {
-        get
+        if (Instance != null && Instance != this)
         {
-            return _score;
+            Destroy(gameObject);
+            return;
         }
-    }
 
-    protected override void Init()
-    {
+        Instance = this;
+
         scoreText = GetComponent<TMP_Text>();
-
+        if (scoreText == null)
+            Debug.LogError("ScoreManager aynı objede TMP_Text bulamadı. ScoreManager'ı TMP Text objesine eklediğinden emin ol.");
     }
 
     private void Start()
     {
         _grid = (MatchableGrid)MatchableGrid.Instance;
         _pool = (MatchablePool)MatchablePool.Instance;
-
     }
-    //Muhsina yaptığı değişiklikler
+
     public void ResetScore()
     {
         _score = 0;
-        scoreText.text = "Score: " + _score;
+        if (scoreText) scoreText.text = "Score: " + _score;
         OnScoreChanged?.Invoke(_score);
     }
-    //Muhsina yaptığı değişiklikler
+
     public void AddScore(int amount)
     {
         _score += amount;
-        scoreText.text = "Score: " + _score;
-        OnScoreChanged?.Invoke(_score); // muhsina ekledi
+        if (scoreText) scoreText.text = "Score: " + _score;
+        OnScoreChanged?.Invoke(_score);
     }
 
     public IEnumerator ResolveMatch(Match toResolve, MatchType powerupUsed = MatchType.invalid)
@@ -58,61 +60,35 @@ public class ScoreManager : Singleton<ScoreManager>
 
         Transform target = collectionPoint;
 
-        //powerup (zaten bir powerup sonucu resolve ediyorsak tekrar powerup oluşturmasın)
         if (powerupUsed == MatchType.invalid && toResolve.Count > 3)
         {
-
             powerupFormed = _pool.UpgradeMatchable(toResolve.ToBeUpgraded, toResolve.GetMatchType);
             toResolve.RemoveMatchable(powerupFormed);
 
             target = powerupFormed.transform;
-
             powerupFormed.SortingOrder = 3;
         }
-
 
         for (int i = 0; i < toResolve.Count; i++)
         {
             matchable = toResolve.Matchables[i];
 
-            //match5 powerup'ı mı kontrol et, match5 powerup ise resolve veya remove yapma
             if (powerupUsed != MatchType.match5 && matchable.IsGem)
-            {
                 continue;
-            }
 
-
-
-            // remove the matchables from the grid
             _grid.RemoveItemAt(matchable.position);
 
-            //move them off to the side of the screen
             if (i == toResolve.Count - 1)
-            {
                 yield return StartCoroutine(matchable.Resolve(target));
-            }
             else
-            {
                 StartCoroutine(matchable.Resolve(target));
-            }
-
-
-
         }
 
-        //update the player's score
         AddScore(toResolve.Count * toResolve.Count);
 
         if (powerupFormed != null)
-        {
             powerupFormed.SortingOrder = 3;
-        }
-
-
 
         yield return null;
     }
-
-
 }
-

@@ -19,6 +19,10 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private TMP_Text gridOutput;
     private void Start()
     {
+        //music
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayGameplayMusic();
+
         // get references to other important game objects
         _pool = (MatchablePool)MatchablePool.Instance;
         _grid = (MatchableGrid)MatchableGrid.Instance;

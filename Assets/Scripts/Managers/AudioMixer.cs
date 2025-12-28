@@ -23,12 +23,15 @@ public class AudioMixer : Singleton<AudioMixer>
     protected override void Init()
     {
         soundEffects = GetComponent<AudioSource>();
-        print(soundEffects);
+        DontDestroyOnLoad(gameObject);
     }
 
     //play background music
     public void PlayMusic()
     {
+        if (music == null) return;
+        if (music.isPlaying) return; // Prevent restarting if already playing
+        
         music.Play();
     }
 

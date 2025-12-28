@@ -1515,7 +1515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   levels:
-  - targetScore: 100
+  - targetScore: 500
     moves: 15
     background: {fileID: 0}
   - targetScore: 1500

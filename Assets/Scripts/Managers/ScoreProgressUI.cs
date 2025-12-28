@@ -10,6 +10,7 @@ public class ScoreProgressUI : MonoBehaviour
     [SerializeField] private Image fillImage;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text levelNameText; // Level adı için referans
+    [SerializeField] private TMP_Text movesText; // Hamle sayısı referansı
 
     [Header("Optional")]
     [SerializeField] private string gameSceneName = "SampleScene";
@@ -34,6 +35,9 @@ public class ScoreProgressUI : MonoBehaviour
 
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.OnScoreChanged -= UpdateBar;
+            
+        if (lm != null)
+            lm.OnMovesChanged -= UpdateMoves;
     }
 
     private IEnumerator BindWhenReady()
@@ -50,7 +54,6 @@ public class ScoreProgressUI : MonoBehaviour
             yield return null;
 
         // 3. LevelManager bekle ve referans al
-        // Sınıf adı LevelManager (eski LevelManagers değil)
         lm = LevelManager.Instance;
         while (lm == null)
         {
@@ -58,35 +61,38 @@ public class ScoreProgressUI : MonoBehaviour
             yield return null;
         }
 
-        // 4. Endless Mode kontrolü - LevelManager üzerinden
+        // 4. Endless Mode kontrolü
         if (lm.IsEndless)
         {
-            // İstersen burada levelNameText'e "Endless" yazdırıp barı kapatabilirsin
-            // Ama kullanıcı "Endless modda bu bar olmayacak" dediği için komple gizliyoruz
             if (levelNameText != null) levelNameText.text = lm.CurrentLevelName;
             
-            // Eğer barı gizleyip sadece ismi göstermek istersen:
-            if (fillImage.transform.parent != null) 
-                 fillImage.transform.parent.gameObject.SetActive(false); // Bar container gizle
-            else
-                 fillImage.gameObject.SetActive(false);
-                 
-            // Ama basitçe tüm objeyi kapatmak isteniyorsa:
-            // gameObject.SetActive(false);
-            // yield break;
-            
-            // Biz şimdilik sadece bar kısmını etkisiz hale getirelim ama objeyi açık tutalım ki isim yazsın
+            // Moves Endless'da gizlensin mi? "∞" yazabiliriz.
+            if (movesText != null) movesText.text = ""; 
+
+            // Barı gizle
+            if (fillImage != null)
+            {
+                if (fillImage.transform.parent != null) 
+                     fillImage.transform.parent.gameObject.SetActive(false);
+                else
+                     fillImage.gameObject.SetActive(false);
+            }
         }
         else
         {
-            // Normal Mod: İsim yaz
             if (levelNameText != null) 
                 levelNameText.text = lm.CurrentLevelName;
+                
+            // İlk hamle sayısını yaz
+            UpdateMoves(lm.RemainingMoves, lm.CurrentTargetMoves);
         }
 
         // Event bağla
         ScoreManager.Instance.OnScoreChanged -= UpdateBar;
         ScoreManager.Instance.OnScoreChanged += UpdateBar;
+        
+        lm.OnMovesChanged -= UpdateMoves;
+        lm.OnMovesChanged += UpdateMoves;
 
         currentFill = 0f;
         if (fillImage != null) fillImage.fillAmount = 0f;
@@ -94,11 +100,18 @@ public class ScoreProgressUI : MonoBehaviour
         UpdateBar(ScoreManager.Instance.Score);
     }
 
+    private void UpdateMoves(int remaining, int total)
+    {
+        if (movesText != null && !lm.IsEndless)
+        {
+            movesText.text = "Moves: " + remaining;
+        }
+    }
+
     private void UpdateBar(int score)
     {
         if (lm == null) lm = LevelManager.Instance;
         
-        // Endless modda bar güncelleme yok
         if (lm != null && lm.IsEndless) return;
 
         if (lm != null)

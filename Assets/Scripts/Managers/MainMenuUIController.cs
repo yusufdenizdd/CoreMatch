@@ -42,7 +42,7 @@ public class MainMenuUIController : MonoBehaviour
         GameSession.HasSelection = true;
         GameSession.IsEndless = false;
         GameSession.StartLevelIndex = Mathf.Clamp(levelNumber - 1, 0, 4);
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene(gameSceneName);
     }
 
 
@@ -51,7 +51,7 @@ public class MainMenuUIController : MonoBehaviour
         GameSession.HasSelection = true;
         GameSession.IsEndless = true;
         GameSession.StartLevelIndex = 0; // önemli: 0 ver
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(gameSceneName);
     }
 
 

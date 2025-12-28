@@ -139,6 +139,8 @@ public class LevelManager : Singleton<LevelManager>
         PlayerPrefs.Save();
     }
 
+    public event Action OnLevelStarted;
+
     public void StartLevel(int index)
     {
         StartCoroutine(StartLevelRoutine(index));
@@ -183,6 +185,8 @@ public class LevelManager : Singleton<LevelManager>
 
         // Artık oynanabilir
         _isPlaying = true;
+        
+        OnLevelStarted?.Invoke();
 
         // Re-enable cursor since GameManager Setup disabled it and we broke out early
         if (Cursor.Instance != null) Cursor.Instance.enabled = true;

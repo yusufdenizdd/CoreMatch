@@ -1519,10 +1519,10 @@ MonoBehaviour:
     moves: 15
     background: {fileID: 0}
   - targetScore: 1500
-    moves: 20
+    moves: 45
     background: {fileID: 0}
   - targetScore: 2000
-    moves: 25
+    moves: 60
     background: {fileID: 0}
   - targetScore: 3000
     moves: 30

@@ -37,7 +37,10 @@ public class ScoreProgressUI : MonoBehaviour
             ScoreManager.Instance.OnScoreChanged -= UpdateBar;
             
         if (lm != null)
+        {
             lm.OnMovesChanged -= UpdateMoves;
+            lm.OnLevelStarted -= UpdateUI;
+        }
     }
 
     private IEnumerator BindWhenReady()
@@ -93,11 +96,35 @@ public class ScoreProgressUI : MonoBehaviour
         
         lm.OnMovesChanged -= UpdateMoves;
         lm.OnMovesChanged += UpdateMoves;
+        
+        lm.OnLevelStarted -= UpdateUI;
+        lm.OnLevelStarted += UpdateUI;
 
         currentFill = 0f;
         if (fillImage != null) fillImage.fillAmount = 0f;
 
         UpdateBar(ScoreManager.Instance.Score);
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (lm == null) return;
+
+        if (lm.IsEndless)
+        {
+             if (levelNameText != null) levelNameText.text = lm.CurrentLevelName;
+             if (movesText != null) movesText.text = "";
+             // Endless ui logic (gizleme vs) buraya da tekrar eklenebilir gerekirse
+        }
+        else
+        {
+             if (levelNameText != null) levelNameText.text = lm.CurrentLevelName;
+             // Yeni level başladığında bar sıfırlansın
+             currentFill = 0f;
+             if (fillImage != null) fillImage.fillAmount = 0f;
+             if (scoreText != null) scoreText.text = $"0 / {lm.CurrentTargetScore}";
+        }
     }
 
     private void UpdateMoves(int remaining, int total)

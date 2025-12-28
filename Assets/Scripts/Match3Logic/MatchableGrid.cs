@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-//using System.Numerics;
-using Unity.VisualScripting;
+
 //using System.Numerics;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
@@ -9,19 +8,13 @@ using UnityEngine.SocialPlatforms.Impl;
 public class MatchableGrid : GridSystem<Matchable>
 {
     [SerializeField] private Vector3 offscreenOffset;
-    private List<Matchable> possibleMoves;
     private MatchablePool _pool;
     private ScoreManager _score;
-
-    private Hint _hint;
-    private AudioMixer _audioMixer;
 
     private void Start()
     {
         _pool = (MatchablePool)MatchablePool.Instance;
         _score = ScoreManager.Instance;
-        _hint = Hint.Instance;
-        _audioMixer = AudioMixer.Instance;
     }
     public IEnumerator PopulateGrid(bool allowMatches = false, bool initialPopulation = false)
     {
@@ -75,8 +68,6 @@ public class MatchableGrid : GridSystem<Matchable>
         for (int i = 0; i < newMatchables.Count; i++)
         {
             onscreenPosition = transform.position + new Vector3(newMatchables[i].position.x, newMatchables[i].position.y);
-
-            _audioMixer.PlayDelayedSound(SoundEffects.land, 1f / newMatchables[i].Speed);
 
             if (i == newMatchables.Count - 1)
             {
@@ -150,10 +141,6 @@ public class MatchableGrid : GridSystem<Matchable>
         Matchable[] copies = new Matchable[2];
         copies[0] = toBeSwapped[0];
         copies[1] = toBeSwapped[1];
-
-        //ipucunu gizle
-        _hint.CancelHint();
-
         // yield until matchables animate swapping
         yield return StartCoroutine(Swap(copies));
 
@@ -161,19 +148,19 @@ public class MatchableGrid : GridSystem<Matchable>
         if (copies[0].IsGem && copies[1].IsGem)
         {
             //ikisi de match5 ise hayat biticek
-            yield return MatchEverything();
+            MatchEverything();
             yield break;
 
         }
         if (copies[0].IsGem)
         {
-            yield return MatchEverythingByType(copies[0], copies[1].Type);
+            MatchEverythingByType(copies[0], copies[1].Type);
             yield break;
 
         }
         else if (copies[1].IsGem)
         {
-            yield return MatchEverythingByType(copies[1], copies[0].Type);
+            MatchEverythingByType(copies[1], copies[0].Type);
             yield break;
 
         }
@@ -206,10 +193,6 @@ public class MatchableGrid : GridSystem<Matchable>
             {
                 StartCoroutine(FillAndScanGrid());
             }
-            else
-            {
-                CheckPossibleMoves();
-            }
         }
         else
         {
@@ -231,29 +214,7 @@ public class MatchableGrid : GridSystem<Matchable>
             //scan again (collapsegrid, populategrid, scanformatches tekrar çalışcak)
             StartCoroutine(FillAndScanGrid());
         }
-        else //chain reaction yoksa ve grid idle ise, mümkün hamle var mı kontrol et 
-        {
-            CheckPossibleMoves();
-        }
 
-    }
-
-    public void CheckPossibleMoves()
-    {
-        if (ScanForMoves() == 0)
-        {
-            //hamle kalmadı
-            GameManager.Instance.NoMoreMoves();
-
-        }
-        else
-        {
-            //hamle var, öneri yap 
-            _hint.EnableHintButton();
-
-            _hint.StartAutoHint(possibleMoves[Random.Range(0, possibleMoves.Count)].transform);
-
-        }
     }
 
     // gridin hepsine bakıp non-empty ve idle matchables arıyor ve patlatıyor
@@ -304,8 +265,6 @@ public class MatchableGrid : GridSystem<Matchable>
             }
         }
         StartCoroutine(_score.ResolveMatch(allAdjacent, MatchType.match4));
-
-        _audioMixer.PlaySound(SoundEffects.powerup);
     }
 
     //+ şeklinde yatay ve dikeydeki her şeyi patlat (cross)
@@ -332,8 +291,6 @@ public class MatchableGrid : GridSystem<Matchable>
 
 
         StartCoroutine(_score.ResolveMatch(rowAndColumn, MatchType.cross));
-
-        _audioMixer.PlaySound(SoundEffects.powerup);
     }
     private void CollapseGrid()
     {
@@ -376,9 +333,6 @@ public class MatchableGrid : GridSystem<Matchable>
 
         // start the animation
         StartCoroutine(toMove.MoveToPosition(transform.position + new Vector3(x, y)));
-
-        _audioMixer.PlayDelayedSound(SoundEffects.land, 1f / toMove.Speed);
-
 
     }
 
@@ -485,8 +439,6 @@ public class MatchableGrid : GridSystem<Matchable>
         worldPosition[0] = toBeSwapped[0].transform.position;
         worldPosition[1] = toBeSwapped[1].transform.position;
 
-        _audioMixer.PlaySound(SoundEffects.swap);
-
 
         //move them to their new positions on screen
         StartCoroutine(toBeSwapped[0].MoveToPosition(worldPosition[1]));
@@ -494,7 +446,7 @@ public class MatchableGrid : GridSystem<Matchable>
     }
 
     //hayatı bitir
-    public IEnumerator MatchEverything()
+    public void MatchEverything()
     {
         Match everything = new Match();
         for (int y = 0; y < Dimensions.y; y++)
@@ -510,15 +462,13 @@ public class MatchableGrid : GridSystem<Matchable>
 
         }
 
-        yield return StartCoroutine(_score.ResolveMatch(everything, MatchType.match5));
+        StartCoroutine(_score.ResolveMatch(everything, MatchType.match5));
         StartCoroutine(FillAndScanGrid());
-
-        _audioMixer.PlaySound(SoundEffects.powerup);
 
     }
 
     //tek renkteki her şeyi bitir
-    public IEnumerator MatchEverythingByType(Matchable gem, int type)
+    public void MatchEverythingByType(Matchable gem, int type)
     {
         Match everythingByType = new Match(gem);
         for (int y = 0; y < Dimensions.y; y++)
@@ -534,108 +484,42 @@ public class MatchableGrid : GridSystem<Matchable>
 
         }
 
-        yield return StartCoroutine(_score.ResolveMatch(everythingByType, MatchType.match5));
+        StartCoroutine(_score.ResolveMatch(everythingByType, MatchType.match5));
         StartCoroutine(FillAndScanGrid());
-
-        _audioMixer.PlaySound(SoundEffects.powerup);
 
     }
 
-    //hamle yapacak kombinasyon kaldı mı diye tara
-    private int ScanForMoves()
+    // Muhsina ekledi
+    public IEnumerator ResetGrid(bool allowMatchesOnStart = false)
     {
-        possibleMoves = new List<Matchable>();
+        // Devam eden swap/fill/scan coroutineleri varsa çakışmasın:
+        StopAllCoroutines();
 
-        //tüm gridi tara
+        // 1) Griddeki tüm taşları pool’a iade et
         for (int y = 0; y < Dimensions.y; y++)
         {
             for (int x = 0; x < Dimensions.x; x++)
             {
-                if (CheckBounds(x, y) && !IsEmpty(x, y) && CanMove(GetItemAt(x, y)))
+                if (!IsEmpty(x, y))
                 {
-                    possibleMoves.Add(GetItemAt(x, y));
+                    Matchable m = GetItemAt(x, y);
 
+                    // grid datasından kaldır
+                    RemoveItemAt(x, y);
+
+                    // havuza gönder (animasyonsuz hızlı reset)
+                    _pool.ReturnObjectToPool(m);
                 }
-
             }
-
         }
 
-        //hamle yapacak matchable'lar varsa listeye ekle
+        // 2) Grid datasını tamamen temizle
+        Clear();
 
-        return possibleMoves.Count;
-    }
-    private bool CanMove(Matchable toCheck)
-    {
-        //her 4 yönde de 4 farklı durumu kontrol ediyor yani toplamda 16 durumu
-        if (CanMove(toCheck, Vector2Int.up) || CanMove(toCheck, Vector2Int.right) || CanMove(toCheck, Vector2Int.down) || CanMove(toCheck, Vector2Int.left))
-        {
-            return true;
-        }
-
-        //17. durum kaldı, gem powerup olduysa o yani. gem ise her türlü eşleşir. yani true
-        if (toCheck.IsGem)
-        {
-            return true;
-        }
-        return false;
+        // 3) Yeniden doldur
+        yield return StartCoroutine(PopulateGrid(allowMatchesOnStart, true));
     }
 
-    private bool CanMove(Matchable toCheck, Vector2Int direction)
-    {
-
-        // taşın 2 ve 3 adım önündeki taşlara bak dümdüz yani (sağ/sol/yukarı/aşağı 2. ve 3. adım önündeki taşlara)
-        Vector2Int position1 = toCheck.position + direction * 2;
-        Vector2Int position2 = toCheck.position + direction * 3;
-
-        if (IsAPotantialMatch(toCheck, position1, position2))
-        {
-            return true;
-        }
-
-        Vector2Int cw = new Vector2Int(direction.y, -direction.x);
-        Vector2Int ccw = new Vector2Int(-direction.y, direction.x);
-        // çaprazındaki 2. ve 3. taşa bak bak (saat yönünde)
-        position1 = toCheck.position + direction + cw;
-        position2 = toCheck.position + direction + cw * 2;
-
-        if (IsAPotantialMatch(toCheck, position1, position2))
-        {
-            return true;
-        }
-
-        //iki yöndeki çapraza da bak (birer adım ilerisindeki)
-        position2 = toCheck.position + direction + ccw;
-
-        if (IsAPotantialMatch(toCheck, position1, position2))
-        {
-            return true;
-        }
-
-        // çaprazındaki 2. ve 3. taşa bak (saat yönünün tersinde)
-        position1 = toCheck.position + direction + ccw * 2;
-
-        if (IsAPotantialMatch(toCheck, position1, position2))
-        {
-            return true;
-        }
-
-
-        return false;
-    }
-
-    private bool IsAPotantialMatch(Matchable toCompare, Vector2Int position1, Vector2Int position2)
-    {
-        if (CheckBounds(position1) && CheckBounds(position2) && !IsEmpty(position1) && !IsEmpty(position2) && GetItemAt(position1).Idle && GetItemAt(position2).Idle && GetItemAt(position1).Type == toCompare.Type && GetItemAt(position2).Type == toCompare.Type)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    //hint göster
-    public void ShowHint()
-    {
-        _hint.PointHint(possibleMoves[Random.Range(0, possibleMoves.Count)].transform);
-    }
+    //Muhsina ekledi
 }
+

@@ -39,17 +39,29 @@ public class Cursor : Singleton<Cursor>
     public void SelectSecond(Matchable toSelect)
     {
         _selected[1] = toSelect;
-        if (!enabled || _selected[0] == null || _selected[1] == null || !_selected[0].Idle || !_selected[1].Idle || _selected[0] == _selected[1])
+
+        if (LevelManagers.Instance != null && !LevelManagers.Instance.IsPlaying)
         {
+            SelectFirst(null);
             return;
         }
+
+        if (!enabled || _selected[0] == null || _selected[1] == null ||
+            !_selected[0].Idle || !_selected[1].Idle || _selected[0] == _selected[1])
+            return;
+
         if (SelectedAreAdjacent())
         {
-            print("Swapping matchables at positions: (" + _selected[0].position.x + ", " + _selected[0].position.y + ") and (" + _selected[1].position.x + ", " + _selected[1].position.y + ")");
+            // ✅ hamle sadece geçerli swap denemesinde düşsün
+            if (LevelManagers.Instance != null)
+                LevelManagers.Instance.OnMoveUsed();
+
             StartCoroutine(_grid.TrySwap(_selected));
         }
+
         SelectFirst(null);
     }
+
 
     private bool SelectedAreAdjacent()
     {

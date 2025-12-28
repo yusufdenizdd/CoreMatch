@@ -42,6 +42,15 @@ public class LevelManager : Singleton<LevelManager>
     public bool IsPlaying => _isPlaying;
     public int RemainingMoves => _remainingMoves;
     public int CurrentLevel => _levelIndex + 1;
+    
+    public string CurrentLevelName
+    {
+        get
+        {
+            if (_isEndless) return "Endless Mode";
+            return "Level " + (_levelIndex + 1);
+        }
+    }
 
     // Level hedeflerini UI için dışarı ver
     public int CurrentTargetScore => (levels != null && levels.Length > 0)

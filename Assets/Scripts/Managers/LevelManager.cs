@@ -149,6 +149,9 @@ public class LevelManager : Singleton<LevelManager>
     private IEnumerator StartLevelRoutine(int index)
     {
         _levelIndex = Mathf.Clamp(index, 0, levels.Length - 1);
+        
+        // Notify UI immediately about the change
+        OnLevelStarted?.Invoke();
 
         // Önce input kilitle
         _isPlaying = false;
@@ -185,8 +188,6 @@ public class LevelManager : Singleton<LevelManager>
 
         // Artık oynanabilir
         _isPlaying = true;
-        
-        OnLevelStarted?.Invoke();
 
         // Re-enable cursor since GameManager Setup disabled it and we broke out early
         if (Cursor.Instance != null) Cursor.Instance.enabled = true;

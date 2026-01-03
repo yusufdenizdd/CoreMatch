@@ -174,41 +174,41 @@ public class Matchable : Movable
     }
 
     // TEST FONKSİYONU: Mouse taşın üzerindeyken çalışır
-    private void OnMouseOver()
-    {
-        // Sağ Tık: Tür/Renk Değiştir
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (_pool != null)
-            {
-                _pool.NextType(this);
-            }
-        }
+    /*  private void OnMouseOver()
+      {
+          // Sağ Tık: Tür/Renk Değiştir
+          if (Input.GetMouseButtonDown(1))
+          {
+              if (_pool != null)
+              {
+                  _pool.NextType(this);
+              }
+          }
 
-        // P Tuşu: Powerup Döngüsü (Match4 <-> Match5)
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            if (_powerup == MatchType.match4)
-            {
-                // Roket ise -> Renk Bombası yap
-                _pool.UpgradeMatchable(this, MatchType.match5);
-            }
-            else if (_powerup == MatchType.match5)
-            {
-                // Renk Bombası ise -> Roket yap
+          // P Tuşu: Powerup Döngüsü (Match4 <-> Match5)
+          if (Input.GetKeyDown(KeyCode.P))
+          {
+              if (_powerup == MatchType.match4)
+              {
+                  // Roket ise -> Renk Bombası yap
+                  _pool.UpgradeMatchable(this, MatchType.match5);
+              }
+              else if (_powerup == MatchType.match5)
+              {
+                  // Renk Bombası ise -> Roket yap
 
-                // DİKKAT: Bomba renksiz olduğu için, rokete çevirmeden önce
-                // ona rastgele bir renk/tür veriyoruz ki "beyaz roket" olmasın.
-                _pool.RandomizeType(this);
+                  // DİKKAT: Bomba renksiz olduğu için, rokete çevirmeden önce
+                  // ona rastgele bir renk/tür veriyoruz ki "beyaz roket" olmasın.
+                  _pool.RandomizeType(this);
 
-                _pool.UpgradeMatchable(this, MatchType.match4);
-            }
-            else
-            {
-                // Hiçbiri değilse (Normal taşsa) -> Roket yaparak başlat
-                _pool.UpgradeMatchable(this, MatchType.match4);
-            }
-        }
-    }
-
+                  _pool.UpgradeMatchable(this, MatchType.match4);
+              }
+              else
+              {
+                  // Hiçbiri değilse (Normal taşsa) -> Roket yaparak başlat
+                  _pool.UpgradeMatchable(this, MatchType.match4);
+              }
+          }
+      }
+  */
 }

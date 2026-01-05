@@ -20,15 +20,7 @@ Unlike standard prototypes relying on heavy external libraries, Core Match focus
 * **Custom Animation System:** Tile movements and swap mechanics are implemented using **C# Coroutines** and **Vector3.Lerp** for precise control and performance, avoiding the overhead of external tweening libraries (like DOTween).
 * **Object Pooling Pattern:** Implemented a pooling system for tiles and particle effects to minimize Garbage Collection (GC) spikes and ensure a smooth 60 FPS on mobile/web.
 * **Grid Logic & Algorithms:** Custom grid management system handling match detection, board refill, and deadlock prevention.
-* **Booster Logic:** Algorithmic detection for 4-match (Rocket) and 5-match (Bomb) special combinations.
-
----
-
-## ✨ Key Features
-* **Classic Match-3 Gameplay:** Intuitive swap and match mechanics.
-* **Dynamic Boosters:** Create powerful explosives with smart moves.
-* **Responsive Design:** Optimized UI that adapts to different screen aspect ratios.
-* **Visual Feedback:** "Juicy" interactions with particle effects and screen shake.
+* **Booster Logic:** Algorithmic detection for 4-match (Bomb) and 5-match (Gem) special combinations.
 
 ---
 
